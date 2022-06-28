@@ -14,7 +14,7 @@ class CustomParserTest(TestCase):
         pattern = CustomPattern()
         p = pattern.parse(pattern_string)
 
-        string = 'As a user "Vitold Sedyshev <vit1251@gmail.com>" I want use "BDD" with my computer "notebook Intel Celeron" and then I will be "happy" as expected'
+        string = 'As a user "Vitold Sedyshev \\"vit1251@gmail.com\\"" I want use "BDD" with my computer "notebook Intel Celeron" and then I will be "happy" as expected'
 
         parser = CustomParser()
         got = parser.parse(string)
@@ -23,7 +23,7 @@ class CustomParserTest(TestCase):
             ('LITERAL', 'As'),
             ('LITERAL', 'a'),
             ('LITERAL', 'user'),
-            ('STRING', 'Vitold Sedyshev <vit1251@gmail.com>'),
+            ('STRING', 'Vitold Sedyshev "vit1251@gmail.com"'),
             ('LITERAL', 'I'),
             ('LITERAL', 'want'),
             ('LITERAL', 'use'),
