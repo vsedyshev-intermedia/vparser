@@ -1,18 +1,17 @@
-#
-
-from __future__ import absolute_import
 
 from ._CustomMatcher import CustomMatcher
 
 STATE_LITERAL = "LITERAL"
 STATE_PATTERN = "PATTERN"
 
-class CustomPattern(object):
+EOF = ''
 
+class CustomPattern(object):
 
     def __init__(self):
         self._state = STATE_LITERAL
         self._literal = ""
+        self._pattern = ""
         self._ast = []
 
     def _register(self, node_type, node_value):
@@ -20,28 +19,33 @@ class CustomPattern(object):
 
     def _parse_rune(self, rune):
         if self._state == STATE_LITERAL:
-            if rune == ' ':
+            if rune in [' ', '\t', EOF]:
                 if self._literal:
                     self._register(STATE_LITERAL, self._literal)
                 self._literal = ""
+            elif rune == '}':
+                raise SyntaxError('Unexpected } after "{literal}"'.format(literal=self._literal))
             elif rune == '{':
                 if self._literal:
-                    self._register(STATE_LITERAL, self._literal)
-                self._literal = ""
+                    raise SyntaxError('Unexpected { after "{literal}"'.format(literal=self._literal))
                 #
                 self._state = STATE_PATTERN
             else:
                 self._literal += rune
         elif self._state == STATE_PATTERN:
-            if rune == '}':
-                self._register(STATE_PATTERN, self._literal)
-                self._literal = ""
+            if rune in [EOF]:
+                raise SyntaxError('Unexpected EOF')
+            elif rune == '{':
+                raise SyntaxError('Unexpected { after "{pattern}"'.format(pattern=self._pattern))
+            elif rune == '}':
+                self._register(STATE_PATTERN, self._pattern)
+                self._pattern = ""
                 #
                 self._state = STATE_LITERAL
             else:
-                self._literal += rune
+                self._pattern += rune
         else:
-            raise RuntimeError
+            raise RuntimeError("Invalid state")
 
     def match(self, value):
         matcher = CustomMatcher(pattern=self)
@@ -52,5 +56,5 @@ class CustomPattern(object):
         while runes:
             rune = runes.pop(0)
             self._parse_rune(rune)
+        self._parse_rune(EOF)
         return self._ast
-

@@ -1,6 +1,3 @@
-#
-
-from __future__ import absolute_import
 
 from ._CustomMatcher import CustomMatcher
 from ._CustomParser import CustomParser
